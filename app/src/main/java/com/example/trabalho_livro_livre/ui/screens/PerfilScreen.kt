@@ -1,4 +1,4 @@
-package com.example.trabalho_livro_livre
+package com.example.trabalho_livro_livre.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun PerfilScreen(
     modifier: Modifier = Modifier,
+    nomeUsuario: String = "João Silva",
+    whatsappUsuario: String = "Quixadá, Ceará", // Substitui a localização antiga
     onNavegarParaHome: () -> Unit = {},
     onNavegarParaAdicionar: () -> Unit = {},
     onLogout: () -> Unit = {}

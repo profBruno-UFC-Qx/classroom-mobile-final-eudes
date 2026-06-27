@@ -1,4 +1,4 @@
-package com.example.trabalho_livro_livre
+package com.example.trabalho_livro_livre.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,12 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.trabalho_livro_livre.data.models.LivroPersistido
 
-// Modelo de dados para os itens da listagem de baixo baseada no print
-data class LivroAnunciado(
+// Modelo estritamente visual usado apenas para renderização da linha
+data class LivroAnunciadoVisual(
     val titulo: String,
     val autor: String,
     val infoTag: String,
@@ -33,21 +33,20 @@ data class LivroAnunciado(
 @Composable
 fun AdicionarLivroScreen(
     modifier: Modifier = Modifier,
+    livrosAtuais: List<LivroPersistido> = emptyList(), // Conectado à lista reativa do DataStore
+    onSalvarAnuncio: (String, String, String, String, String, String) -> Unit = { _, _, _, _, _, _ -> }, // Callback da ViewModel
     onNavegarParaHome: () -> Unit = {},
     onNavegarParaPerfil: () -> Unit = {}
 ) {
-    // Estados do Formulário
+    // Estados locais do Formulário
     var titulo by remember { mutableStateOf("") }
     var autor by remember { mutableStateOf("") }
     var preco by remember { mutableStateOf("") }
     var descricao by remember { mutableStateOf("") }
 
-    // Mock da lista inferior conforme imagem fornecida
-    val listadosRecentemente = listOf(
-        LivroAnunciado("Dom Casmurro", "Machado de Assis", "TROCA", Color(0xFFE2F5EC), Color(0xFF2E7D32), Color(0xFF2C435A)),
-        LivroAnunciado("1984", "George Orwell", "R$ 25,00", Color(0xFFE3F2FD), Color(0xFF1565C0), Color(0xFF1C1C1C)),
-        LivroAnunciado("Sapiens", "Yuval Noah Harari", "VENDIDO", Color(0xFFF3F4F6), Color(0xFF6B7280), Color(0xFF738276))
-    )
+    // Estados fixos simulados para os seletores (podem ser expandidos no futuro)
+    val tipoAnuncioSelecionado = "VENDA"
+    val condicaoSelecionada = "Novo"
 
     Column(
         modifier = modifier
@@ -67,7 +66,7 @@ fun AdicionarLivroScreen(
                     .padding(horizontal = 16.dp)
             ) {
 
-                // 1. Cabeçalho Principal (Igual ao da Home)
+                // 1. Cabeçalho Principal
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -119,11 +118,7 @@ fun AdicionarLivroScreen(
                             .fillMaxWidth()
                             .height(110.dp)
                             .background(Color(0xFFF9FAFB), RoundedCornerShape(8.dp))
-                            .border(
-                                width = 1.dp,
-                                color = Color(0xFF9CA3AF),
-                                shape = RoundedCornerShape(8.dp)
-                            ), // Nota: Para pontilhado perfeito usa-se Canvas, essa borda cinza simula o espaço limpo.
+                            .border(width = 1.dp, color = Color(0xFF9CA3AF), shape = RoundedCornerShape(8.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -161,7 +156,7 @@ fun AdicionarLivroScreen(
                         Column(modifier = Modifier.weight(1f)) {
                             BasicText("Negociação", style = TextStyle(fontSize = 13.sp, color = Color(0xFF4B5563), fontWeight = FontWeight.Medium))
                             Spacer(modifier = Modifier.height(4.dp))
-                            CustomSeletorNativo(textoOpcao = "Venda")
+                            CustomSeletorNativo(textoOpcao = tipoAnuncioSelecionado)
                         }
                     }
 
@@ -169,10 +164,10 @@ fun AdicionarLivroScreen(
                     Column {
                         BasicText("Estado de Conservação", style = TextStyle(fontSize = 13.sp, color = Color(0xFF4B5563), fontWeight = FontWeight.Medium))
                         Spacer(modifier = Modifier.height(4.dp))
-                        CustomSeletorNativo(textoOpcao = "Novo")
+                        CustomSeletorNativo(textoOpcao = condicaoSelecionada)
                     }
 
-                    // Campo: Descrição (Mais alto)
+                    // Campo: Descrição
                     Column {
                         BasicText("Descrição", style = TextStyle(fontSize = 13.sp, color = Color(0xFF4B5563), fontWeight = FontWeight.Medium))
                         Spacer(modifier = Modifier.height(4.dp))
@@ -186,13 +181,30 @@ fun AdicionarLivroScreen(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    // Botão Salvar Anúncio (Azul Escuro do print)
+                    // Botão Salvar Anúncio Conectado ao DataStore
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(44.dp)
                             .background(Color(0xFF1C354E), RoundedCornerShape(8.dp))
-                            .clickable { /* Ação de salvar protótipo */ },
+                            .clickable {
+                                if (titulo.isNotBlank() && autor.isNotBlank()) {
+                                    // Dispara o evento de salvamento real para o DataStore
+                                    onSalvarAnuncio(
+                                        titulo,
+                                        autor,
+                                        preco.ifEmpty { "0.00" },
+                                        tipoAnuncioSelecionado,
+                                        condicaoSelecionada,
+                                        descricao
+                                    )
+                                    // Limpa os campos do formulário para o próximo input
+                                    titulo = ""
+                                    autor = ""
+                                    preco = ""
+                                    descricao = ""
+                                }
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         BasicText(
@@ -204,7 +216,7 @@ fun AdicionarLivroScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // 4. Seção Listados Recentemente
+                // 4. Seção Listados Recentemente Dinâmica
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -215,26 +227,42 @@ fun AdicionarLivroScreen(
                         style = TextStyle(color = Color(0xFF0F2C3D), fontSize = 15.sp, fontWeight = FontWeight.Bold)
                     )
                     BasicText(
-                        text = "3 itens",
+                        text = "${livrosAtuais.size} itens",
                         style = TextStyle(color = Color.Gray, fontSize = 13.sp)
                     )
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Renderização das linhas de livros cadastrados
+                // Renderização reativa dos livros vindo do DataStore
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.padding(bottom = 24.dp)
                 ) {
-                    listadosGrid.forEach { livro ->
-                        LinhaLivroAnunciado(livro = livro)
+                    if (livrosAtuais.isEmpty()) {
+                        BasicText(
+                            text = "Nenhum livro cadastrado ainda.",
+                            style = TextStyle(color = Color.Gray, fontSize = 13.sp)
+                        )
+                    } else {
+                        livrosAtuais.forEach { livro ->
+                            LinhaLivroAnunciado(
+                                livro = LivroAnunciadoVisual(
+                                    titulo = livro.titulo,
+                                    autor = livro.autor,
+                                    infoTag = if (livro.preco == "0.00" || livro.preco.isEmpty()) livro.tipoAnuncio else "R$ ${livro.preco}",
+                                    corTagBg = if (livro.preco == "0.00" || livro.preco.isEmpty()) Color(0xFFE2F5EC) else Color(0xFFE3F2FD),
+                                    corTagTexto = if (livro.preco == "0.00" || livro.preco.isEmpty()) Color(0xFF2E7D32) else Color(0xFF1565C0),
+                                    corCapaSimulada = Color(0xFF2C435A)
+                                )
+                            )
+                        }
                     }
                 }
             }
         }
 
-        // --- BARRA DE NAVEGAÇÃO DO RODAPÉ (Consistentemente igual à Home, mudando o foco se necessário) ---
+        // --- BARRA DE NAVEGAÇÃO DO RODAPÉ ---
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -257,7 +285,7 @@ fun AdicionarLivroScreen(
                 BasicText(text = "Home", style = TextStyle(color = Color.Gray, fontSize = 11.sp))
             }
 
-            // Aba 2: Library (Ativa neste escopo de gerenciar anúncios)
+            // Aba 2: Library (Ativa)
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -265,7 +293,6 @@ fun AdicionarLivroScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // Fundo esverdeado suave na aba ativa para bater com a estilização visual do print
                 Box(
                     modifier = Modifier
                         .background(Color(0xFFE2F5EC), RoundedCornerShape(12.dp))
@@ -344,7 +371,7 @@ fun CustomSeletorNativo(textoOpcao: String) {
 }
 
 @Composable
-fun LinhaLivroAnunciado(livro: LivroAnunciado) {
+fun LinhaLivroAnunciado(livro: LivroAnunciadoVisual) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -353,7 +380,6 @@ fun LinhaLivroAnunciado(livro: LivroAnunciado) {
             .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Capa Miniatura Simulada
         Box(
             modifier = Modifier
                 .size(width = 46.dp, height = 64.dp)
@@ -362,7 +388,6 @@ fun LinhaLivroAnunciado(livro: LivroAnunciado) {
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        // Dados textuais do livro (Título, Autor e Tag)
         Column(modifier = Modifier.weight(1f)) {
             BasicText(
                 text = livro.titulo,
@@ -385,7 +410,6 @@ fun LinhaLivroAnunciado(livro: LivroAnunciado) {
             }
         }
 
-        // Ícones de Ação de Edição (Lápis e Lixeira) simulados textualmente
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -394,17 +418,4 @@ fun LinhaLivroAnunciado(livro: LivroAnunciado) {
             BasicText(text = "🗑️", modifier = Modifier.clickable { }, style = TextStyle(fontSize = 14.sp))
         }
     }
-}
-
-// Lista fixa para renderizar no escopo
-val listadosGrid = listOf(
-    LivroAnunciado("Dom Casmurro", "Machado de Assis", "TROCA", Color(0xFFE2F5EC), Color(0xFF2E7D32), Color(0xFF2C435A)),
-    LivroAnunciado("1984", "George Orwell", "R$ 25,00", Color(0xFFE3F2FD), Color(0xFF1565C0), Color(0xFF1C1C1C)),
-    LivroAnunciado("Sapiens", "Yuval Noah Harari", "VENDIDO", Color(0xFFF3F4F6), Color(0xFF6B7280), Color(0xFF738276))
-)
-
-@Preview(showBackground = true, device = "id:pixel_5")
-@Composable
-fun AdicionarPreview() {
-    AdicionarLivroScreen()
 }
