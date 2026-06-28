@@ -122,18 +122,19 @@ fun DetalhesLivroScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Ficha Técnica Rápida (Categoria e Condição)
+// Ficha Técnica Rápida (Tipo de Anúncio e Condição)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                FichaInformativaItem(label = "Categoria", valor = categoriaLivro, modifier = Modifier.weight(1f))
+                // Usando tipoAnuncio no lugar de categoria
+                FichaInformativaItem(label = "Anúncio", valor = tipoAnuncio, modifier = Modifier.weight(1f))
                 FichaInformativaItem(label = "Condição", valor = condicaoLivro, modifier = Modifier.weight(1f))
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Seção: Descrição
+// Seção: Descrição
             BasicText(
                 text = "Descrição",
                 style = TextStyle(color = Color(0xFF0F2C3D), fontSize = 16.sp, fontWeight = FontWeight.Bold)
@@ -142,7 +143,7 @@ fun DetalhesLivroScreen(
             Spacer(modifier = Modifier.height(6.dp))
 
             BasicText(
-                text = descricaoLivro,
+                text = descricaoLivro.ifBlank { "Nenhuma descrição fornecida para este livro." },
                 style = TextStyle(color = Color(0xFF4B5563), fontSize = 14.sp, lineHeight = 20.sp)
             )
 

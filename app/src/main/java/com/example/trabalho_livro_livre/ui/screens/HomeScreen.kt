@@ -68,6 +68,8 @@ fun HomeScreen(
             titulo = livro.titulo,
             autor = livro.autor,
             tipo = if (livro.preco == "0.00" || livro.preco.isEmpty()) livro.tipoAnuncio else "R$ ${livro.preco}",
+            condicao = livro.condicao,
+            descricao = livro.descricao,
             corTagBg = if (livro.preco == "0.00" || livro.preco.isEmpty()) Color(0xFFE2F5EC) else Color(0xFFFFF9C4),
             corTagTexto = if (livro.preco == "0.00" || livro.preco.isEmpty()) Color(0xFF2E7D32) else Color(0xFFF57F17),
             corCapaSimulada = Color(0xFF1C354E),
