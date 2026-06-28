@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
+import com.example.trabalho_livro_livre.data.remote.BooksApi
+import com.example.trabalho_livro_livre.data.remote.VolumeInfo
 
 // Definição do modelo de transporte para o cadastro local
 data class CadastroLocal(val nome: String, val email: String, val whatsapp: String, val senha: String)
@@ -40,6 +42,15 @@ class AppRepository(private val context: Context) {
             whatsapp = prefs[stringPreferencesKey("user_whatsapp")] ?: "",
             senha = prefs[stringPreferencesKey("user_senha")] ?: ""
         )
+    }
+
+    suspend fun pesquisarLivroOnline(titulo: String): VolumeInfo? {
+        return try {
+            BooksApi.buscarLivro(titulo)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
     // CORRIGIDO: Adicionado 'context.' antes de dataStore

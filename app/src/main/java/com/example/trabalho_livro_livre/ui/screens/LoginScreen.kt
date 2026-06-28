@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,6 +20,27 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.serialization.Serializable
+import androidx.compose.runtime.*
+import androidx.compose.ui.text.font.FontStyle
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.android.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.serialization.kotlinx.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.coroutines.launch
+
+
+@Serializable
+data class QuoteResponse(val content: String, val author: String)
+
+@Serializable
+data class AdviceResponse(val slip: Slip)
+
+@Serializable
+data class Slip(val advice: String)
 
 @Composable
 fun LoginScreen(
@@ -33,6 +55,25 @@ fun LoginScreen(
 
     // Estado para controlar mensagens de validação
     var erroMensagem by remember { mutableStateOf("") }
+
+    var quote by remember { mutableStateOf("Carregando frase...") }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        val client = HttpClient(Android) {
+            install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
+        }
+
+        try {
+            // Nova API (Advice Slip)
+            val response: AdviceResponse = client.get("https://api.adviceslip.com/advice").body()
+            quote = "\"${response.slip.advice}\""
+        } catch (e: Exception) {
+            quote = "Erro: ${e.message}" // Mostra o erro real para sabermos o motivo
+        } finally {
+            client.close()
+        }
+    }
 
     Column(
         modifier = modifier
@@ -203,6 +244,11 @@ fun LoginScreen(
                 modifier = Modifier.clickable { onNavegarParaRegistro() }
             )
         }
+        Text(
+            text = quote,
+            modifier = Modifier.padding(16.dp),
+            style = TextStyle(fontSize = 14.sp, fontStyle = FontStyle.Italic, color = Color.Gray)
+        )
     }
 }
 
