@@ -1,13 +1,19 @@
 package com.example.trabalho_livro_livre.data
 
 import android.content.Context
+import androidx.datastore.dataStore
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.example.trabalho_livro_livre.data.models.LivroPersistido
 import com.example.trabalho_livro_livre.data.models.UsuarioSessao
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
+
+// Definição do modelo de transporte para o cadastro local
+data class CadastroLocal(val nome: String, val email: String, val whatsapp: String, val senha: String)
 
 class AppRepository(private val context: Context) {
 
@@ -24,6 +30,27 @@ class AppRepository(private val context: Context) {
         val json = prefs[DataStoreKeys.LISTA_LIVROS]
         if (json.isNullOrEmpty()) emptyList()
         else try { Json.decodeFromString(json) } catch (e: Exception) { emptyList() }
+    }
+
+    // CORRIGIDO: Adicionado 'context.' antes de dataStore
+    fun obterCadastroSalvo(): Flow<CadastroLocal> = context.dataStore.data.map { prefs ->
+        CadastroLocal(
+            nome = prefs[stringPreferencesKey("user_nome")] ?: "",
+            email = prefs[stringPreferencesKey("user_email")] ?: "",
+            whatsapp = prefs[stringPreferencesKey("user_whatsapp")] ?: "",
+            senha = prefs[stringPreferencesKey("user_senha")] ?: ""
+        )
+    }
+
+    // CORRIGIDO: Adicionado 'context.' antes de dataStore
+    suspend fun salvarCadastroCompleto(nome: String, email: String, whatsapp: String, senha: String) {
+        context.dataStore.edit { prefs ->
+            prefs[stringPreferencesKey("user_nome")] = nome
+            prefs[stringPreferencesKey("user_email")] = email
+            prefs[stringPreferencesKey("user_whatsapp")] = whatsapp
+            prefs[stringPreferencesKey("user_senha")] = senha
+            prefs[booleanPreferencesKey("user_logado")] = true
+        }
     }
 
     suspend fun salvarSessao(nome: String, whatsapp: String) {

@@ -95,42 +95,35 @@ fun Greeting(
         sceneStrategy = listDetailStrategy,
         entryProvider = entryProvider {
 
-            // 1. Tela de Login
+            // 1. Rota de Login
             entry<LoginKey>(metadata = ListDetailSceneStrategy.listPane()) {
                 LoginScreen(
-                    onLoginSucesso = {
-                        // Como a sua LoginScreen não passa parâmetros (), chamamos a ViewModel com um valor padrão
-                        viewModel.logarOuCadastrar(
-                            nome = "Usuário Livre",
-                            whatsapp = "88999999999",
-                            onSucesso = {
-                                backStack.add(HomeKey)
-                            }
+                    onLoginSucesso = { emailDigitado, senhaDigitada, onErrorCallback ->
+                        viewModel.tentarLogin(
+                            emailDigitado = emailDigitado,
+                            senhaDigitada = senhaDigitada,
+                            onSucesso = { backStack.add(HomeKey) },
+                            onErro = { mensagemDeErro -> onErrorCallback(mensagemDeErro) }
                         )
                     },
-                    onNavegarParaRegistro = {
-                        backStack.add(RegistroKey)
-                    }
+                    onNavegarParaRegistro = { backStack.add(RegistroKey) }
                 )
             }
 
-// 2. Tela de Registro
+// 2. Rota de Registro
             entry<RegistroKey>(metadata = ListDetailSceneStrategy.detailPane()) {
                 RegistroScreen(
-                    onRegistroSucesso = {
-                        // Como a sua RegistroScreen também não passa parâmetros (), usamos valores padrão para salvar a sessão
-                        viewModel.logarOuCadastrar(
-                            nome = "Novo Usuário",
-                            whatsapp = "88999999999",
-                            onSucesso = {
-                                backStack.add(HomeKey)
-                            }
+                    onRegistroSucesso = { nome, email, whatsapp, senha ->
+                        viewModel.registrarUsuario(
+                            nome = nome,
+                            email = email,
+                            whatsapp = whatsapp,
+                            senha = senha,
+                            onSucesso = { backStack.add(HomeKey) }
                         )
                     },
                     onVoltarParaLogin = {
-                        if (backStack.size > 1) {
-                            backStack.removeAt(backStack.lastIndex)
-                        }
+                        if (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
                     }
                 )
             }

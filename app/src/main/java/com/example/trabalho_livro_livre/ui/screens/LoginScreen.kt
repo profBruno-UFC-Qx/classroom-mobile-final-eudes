@@ -23,12 +23,16 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    onLoginSucesso: () -> Unit = {},
+    // ALTERADO: Agora envia e-mail, senha e um callback para receber a mensagem de erro da ViewModel
+    onLoginSucesso: (String, String, (String) -> Unit) -> Unit = { _, _, _ -> },
     onNavegarParaRegistro: () -> Unit = {}
 ) {
     var email by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
     var senhaVisivel by remember { mutableStateOf(false) }
+
+    // Estado para controlar mensagens de validação
+    var erroMensagem by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -75,7 +79,10 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(6.dp))
                 BasicTextField(
                     value = email,
-                    onValueChange = { email = it },
+                    onValueChange = {
+                        email = it
+                        if (it.isNotBlank()) erroMensagem = "" // Limpa o erro ao começar a digitar
+                    },
                     textStyle = TextStyle(color = Color.Black, fontSize = 14.sp),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -104,7 +111,10 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(6.dp))
                 BasicTextField(
                     value = senha,
-                    onValueChange = { senha = it },
+                    onValueChange = {
+                        senha = it
+                        if (it.isNotBlank()) erroMensagem = ""
+                    },
                     textStyle = TextStyle(color = Color.Black, fontSize = 14.sp),
                     visualTransformation = if (senhaVisivel) VisualTransformation.None else PasswordVisualTransformation(),
                     modifier = Modifier
@@ -128,7 +138,6 @@ fun LoginScreen(
                                 }
                                 innerTextField()
                             }
-                            // Botão de revelar senha simples
                             BasicText(
                                 text = if (senhaVisivel) "👁️" else "🙈",
                                 style = TextStyle(fontSize = 16.sp),
@@ -139,15 +148,36 @@ fun LoginScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            // Mensagem de Erro Visual (Se houver)
+            if (erroMensagem.isNotEmpty()) {
+                BasicText(
+                    text = erroMensagem,
+                    style = TextStyle(color = Color.Red, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                )
+            } else {
+                Spacer(modifier = Modifier.height(4.dp))
+            }
 
-            // Botão de Entrar (Verde escuro padrão do seu app)
+            // Botão de Entrar com validação real e integração com ViewModel
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(46.dp)
                     .background(Color(0xFF43624E), RoundedCornerShape(8.dp))
-                    .clickable { onLoginSucesso() },
+                    .clickable {
+                        // Validação local de campos em branco
+                        if (email.isBlank() || senha.isBlank()) {
+                            erroMensagem = "Por favor, preencha todos os campos."
+                        } else if (!email.contains("@")) {
+                            erroMensagem = "Insira um formato de e-mail válido."
+                        } else {
+                            // Envia as credenciais reais para a MainActivity buscar na ViewModel/DataStore
+                            onLoginSucesso(email.trim(), senha.trim()) { textoDoErro ->
+                                // Este bloco roda caso o cadastro não coincida ou não exista
+                                erroMensagem = textoDoErro
+                            }
+                        }
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 BasicText(

@@ -24,13 +24,17 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun RegistroScreen(
     modifier: Modifier = Modifier,
-    onRegistroSucesso: () -> Unit = {},
+    // ALTERADO: Agora envia os 4 parâmetros reais para a MainActivity persistir no DataStore
+    onRegistroSucesso: (String, String, String, String) -> Unit = { _, _, _, _ -> },
     onVoltarParaLogin: () -> Unit = {}
 ) {
     var nome by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var whatsapp by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
+
+    // Estado para controlar mensagens de erro de validação
+    var erroMensagem by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -70,7 +74,14 @@ fun RegistroScreen(
                     style = TextStyle(color = Color(0xFF4B5563), fontSize = 13.sp, fontWeight = FontWeight.Medium)
                 )
                 Spacer(modifier = Modifier.height(6.dp))
-                InputRegistro(valor = nome, onValorAlterado = { nome = it }, dica = "Ex: João Silva")
+                InputRegistro(
+                    valor = nome,
+                    onValorAlterado = {
+                        nome = it
+                        if (it.isNotBlank()) erroMensagem = ""
+                    },
+                    dica = "Ex: João Silva"
+                )
             }
 
             // Campo: E-mail
@@ -80,17 +91,31 @@ fun RegistroScreen(
                     style = TextStyle(color = Color(0xFF4B5563), fontSize = 13.sp, fontWeight = FontWeight.Medium)
                 )
                 Spacer(modifier = Modifier.height(6.dp))
-                InputRegistro(valor = email, onValorAlterado = { email = it }, dica = "seu.email@provedor.com")
+                InputRegistro(
+                    valor = email,
+                    onValorAlterado = {
+                        email = it
+                        if (it.isNotBlank()) erroMensagem = ""
+                    },
+                    dica = "seu.email@provedor.com"
+                )
             }
 
-            // Campo: WhatsApp (Crucial para a funcionalidade de contato direto que adicionamos!)
+            // Campo: WhatsApp
             Column {
                 BasicText(
                     text = "WhatsApp (com DDD)",
                     style = TextStyle(color = Color(0xFF4B5563), fontSize = 13.sp, fontWeight = FontWeight.Medium)
                 )
                 Spacer(modifier = Modifier.height(6.dp))
-                InputRegistro(valor = whatsapp, onValorAlterado = { whatsapp = it }, dica = "Ex: 85999999999")
+                InputRegistro(
+                    valor = whatsapp,
+                    onValorAlterado = {
+                        whatsapp = it
+                        if (it.isNotBlank()) erroMensagem = ""
+                    },
+                    dica = "Ex: 88999999999"
+                )
             }
 
             // Campo: Senha
@@ -102,7 +127,10 @@ fun RegistroScreen(
                 Spacer(modifier = Modifier.height(6.dp))
                 BasicTextField(
                     value = senha,
-                    onValueChange = { senha = it },
+                    onValueChange = {
+                        senha = it
+                        if (it.isNotBlank()) erroMensagem = ""
+                    },
                     textStyle = TextStyle(color = Color.Black, fontSize = 14.sp),
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier
@@ -123,15 +151,35 @@ fun RegistroScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            // Exibição da mensagem de erro de validação
+            if (erroMensagem.isNotEmpty()) {
+                BasicText(
+                    text = erroMensagem,
+                    style = TextStyle(color = Color.Red, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                )
+            } else {
+                Spacer(modifier = Modifier.height(4.dp))
+            }
 
-            // Botão de Cadastrar (Azul Escuro para diferenciar do login)
+            // Botão de Cadastrar com a nova lógica aplicada
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(46.dp)
                     .background(Color(0xFF1C354E), RoundedCornerShape(8.dp))
-                    .clickable { onRegistroSucesso() },
+                    .clickable {
+                        // LÓGICA DE VALIDAÇÃO LOCAL:
+                        if (nome.isBlank() || email.isBlank() || whatsapp.isBlank() || senha.isBlank()) {
+                            erroMensagem = "Por favor, preencha todos os campos."
+                        } else if (!email.contains("@")) {
+                            erroMensagem = "Insira um formato de e-mail válido."
+                        } else if (senha.length < 6) {
+                            erroMensagem = "A senha deve conter no mínimo 6 caracteres."
+                        } else {
+                            // ALTERADO: Envia todos os dados informados limpos para a MainActivity
+                            onRegistroSucesso(nome.trim(), email.trim(), whatsapp.trim(), senha.trim())
+                        }
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 BasicText(
