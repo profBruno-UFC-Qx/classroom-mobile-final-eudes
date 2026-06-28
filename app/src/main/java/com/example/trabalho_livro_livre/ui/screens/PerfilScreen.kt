@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun PerfilScreen(
     modifier: Modifier = Modifier,
-    nomeUsuario: String = "João Silva",
+    nomeUsuario: String = "Usuário",
     whatsappUsuario: String = "Quixadá, Ceará", // Substitui a localização antiga
     onNavegarParaHome: () -> Unit = {},
     onNavegarParaAdicionar: () -> Unit = {},
@@ -93,35 +93,16 @@ fun PerfilScreen(
 
                     // Nome e Localização conforme o print image_6ebde2.png
                     BasicText(
-                        text = "João Silva",
+                        text = nomeUsuario,
                         style = TextStyle(color = Color(0xFF0F2C3D), fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        BasicText(
-                            text = "📍 ",
-                            style = TextStyle(fontSize = 12.sp)
-                        )
-                        BasicText(
-                            text = "Quixadá, Ceará",
-                            style = TextStyle(color = Color(0xFF6B7280), fontSize = 13.sp)
-                        )
-                    }
+
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 3. Seção de Métricas / Indicadores (Distribuição Horizontal em 3 colunas)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    ItemMetricaPerfil(valor = "12", label = "Trocas", modifier = Modifier.weight(1f))
-                    ItemMetricaPerfil(valor = "5", label = "Doações", modifier = Modifier.weight(1f))
-                    ItemMetricaPerfil(valor = "4.8 ★", label = "Estrelas", modifier = Modifier.weight(1f))
-                }
+
 
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -132,16 +113,7 @@ fun PerfilScreen(
                         .background(Color.White, RoundedCornerShape(12.dp))
                         .border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(12.dp))
                 ) {
-                    LinhaOpcaoPerfil(icone = "👤", texto = "Editar Perfil")
-                    LinhaDivisoria()
-                    LinhaOpcaoPerfil(icone = "📍", texto = "Meus Endereços")
-                    LinhaDivisoria()
-                    LinhaOpcaoPerfil(icone = "🔔", texto = "Notificações")
-                    LinhaDivisoria()
-                    LinhaOpcaoPerfil(icone = "🛡️", texto = "Privacidade e Segurança")
-                    LinhaDivisoria()
-                    LinhaOpcaoPerfil(icone = "❓", texto = "Ajuda e Suporte")
-                    LinhaDivisoria()
+
 
                     // Opção de Sair com cor de alerta (Vermelho) conforme o mockup
                     LinhaOpcaoPerfil(
