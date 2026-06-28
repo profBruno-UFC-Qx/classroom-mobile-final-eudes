@@ -42,7 +42,8 @@ data class LivroHome(
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    livros: List<LivroPersistido> = emptyList(), // ADICIONADO: Lista dinâmica vinda do DataStore
+    livros: List<LivroPersistido> = emptyList(), // Lista dinâmica vinda do DataStore
+    usuarioWhatsapp: String = "", // ADICIONADO: Usado para validar se o usuário é o dono do anúncio clicado
     onNavegarParaAdicionar: () -> Unit = {},
     onNavegarParaPerfil: () -> Unit = {},
     onLivroClicado: (DetalhesLivroKey) -> Unit = {}
@@ -68,7 +69,8 @@ fun HomeScreen(
             corTagBg = if (livro.preco == "0.00" || livro.preco.isEmpty()) Color(0xFFE2F5EC) else Color(0xFFFFF9C4),
             corTagTexto = if (livro.preco == "0.00" || livro.preco.isEmpty()) Color(0xFF2E7D32) else Color(0xFFF57F17),
             corCapaSimulada = Color(0xFF1C354E),
-            isDono = true // Como foi criado localmente no DataStore, o usuário atual é o dono
+            // ALTERADO: Agora valida dinamicamente se o WhatsApp de quem criou bate com o logado
+            isDono = livro.donoAnuncio == usuarioWhatsapp
         )
     }
 
@@ -209,7 +211,7 @@ fun HomeScreen(
                                     .background(Color.White, RoundedCornerShape(8.dp))
                                     .border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(8.dp))
                                     .clickable {
-                                        // Aciona a rota repassando os parâmetros necessários para a DetalhesLivroKey
+                                        // Aciona a rota repassando se REALMENTE é o dono comparado na linha 53
                                         onLivroClicado(
                                             DetalhesLivroKey(
                                                 id = livro.id,

@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun DetalhesLivroScreen(
     modifier: Modifier = Modifier,
-    isDonoDoAnuncio: Boolean = false, // <- Nova flag: define qual versão da tela vai aparecer
+    isDonoDoAnuncio: Boolean = false, // Define qual versão da tela vai aparecer (Dono vs Consumidor)
     tituloLivro: String = "A Metamorfose",
     autorLivro: String = "Franz Kafka",
     categoriaLivro: String = "Ficção",
@@ -35,6 +35,11 @@ fun DetalhesLivroScreen(
     onExcluirAnuncio: () -> Unit = {},
     onChamarNoWhatsapp: () -> Unit = {}
 ) {
+    // ALTERADO: Define dinamicamente a cor da tag baseado no tipo do anúncio ou preço vindo da Home
+    val isDoacaoOuTroca = tipoAnuncio.contains("DOAÇÃO") || tipoAnuncio.contains("TROCA")
+    val corTagBg = if (isDoacaoOuTroca) Color(0xFFE2F5EC) else Color(0xFFFFF9C4)
+    val corTagTexto = if (isDoacaoOuTroca) Color(0xFF2E7D32) else Color(0xFFF57F17)
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -90,12 +95,12 @@ fun DetalhesLivroScreen(
                 Box(
                     modifier = Modifier
                         .padding(12.dp)
-                        .background(Color(0xFFE2F5EC), RoundedCornerShape(6.dp))
+                        .background(corTagBg, RoundedCornerShape(6.dp)) // ALTERADO: Cor dinâmica de fundo
                         .padding(horizontal = 10.dp, vertical = 5.dp)
                 ) {
                     BasicText(
-                        text = tipoAnuncio,
-                        style = TextStyle(color = Color(0xFF2E7D32), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        text = tipoAnuncio, // ALTERADO: Texto dinâmico (Preço ou tipo)
+                        style = TextStyle(color = corTagTexto, fontSize = 11.sp, fontWeight = FontWeight.Bold) // ALTERADO: Cor dinâmica de texto
                     )
                 }
             }
@@ -229,11 +234,11 @@ fun FichaInformativaItem(label: String, valor: String, modifier: Modifier = Modi
 @Preview(showBackground = true, name = "Visão do Comprador (Consumidor)")
 @Composable
 fun DetalhesConsumidorPreview() {
-    DetalhesLivroScreen(isDonoDoAnuncio = false)
+    DetalhesLivroScreen(isDonoDoAnuncio = false, tipoAnuncio = "R$ 45,00")
 }
 
 @Preview(showBackground = true, name = "Visão do Dono do Anúncio")
 @Composable
 fun DetalhesDonoPreview() {
-    DetalhesLivroScreen(isDonoDoAnuncio = true)
+    DetalhesLivroScreen(isDonoDoAnuncio = true, tipoAnuncio = "TROCA")
 }

@@ -136,7 +136,8 @@ fun Greeting(
                 )
             ) {
                 HomeScreen(
-                    livros = livrosCadastrados, // Repassa a lista dinâmica sem filtros (vê tudo de todos)
+                    livros = livrosCadastrados,
+                    usuarioWhatsapp = sessao.whatsapp, // INJETADO: Passa o whatsapp logado para a Home fazer a comparação
                     onNavegarParaAdicionar = { backStack.add(AdicionarLivroKey) },
                     onNavegarParaPerfil = { backStack.add(PerfilKey) },
                     onLivroClicado = { chaveLivro -> backStack.add(chaveLivro) }
