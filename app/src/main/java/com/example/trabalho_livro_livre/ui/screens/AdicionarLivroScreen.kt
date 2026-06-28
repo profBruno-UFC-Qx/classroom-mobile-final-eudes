@@ -34,6 +34,7 @@ data class LivroAnunciadoVisual(
 fun AdicionarLivroScreen(
     modifier: Modifier = Modifier,
     livrosAtuais: List<LivroPersistido> = emptyList(), // Conectado à lista reativa do DataStore
+    usuarioWhatsapp: String = "", // ADICIONADO: Necessário para sabermos quem está logado e filtrar
     onSalvarAnuncio: (String, String, String, String, String, String) -> Unit = { _, _, _, _, _, _ -> }, // Callback da ViewModel
     onNavegarParaHome: () -> Unit = {},
     onNavegarParaPerfil: () -> Unit = {}
@@ -47,6 +48,11 @@ fun AdicionarLivroScreen(
     // Estados fixos simulados para os seletores (podem ser expandidos no futuro)
     val tipoAnuncioSelecionado = "VENDA"
     val condicaoSelecionada = "Novo"
+
+    // FILTRO REAL: Filtra dinamicamente para mostrar apenas os livros criados por esta conta
+    val meusLivrosFiltrados = remember(livrosAtuais, usuarioWhatsapp) {
+        livrosAtuais.filter { it.donoAnuncio == usuarioWhatsapp }
+    }
 
     Column(
         modifier = modifier
@@ -227,25 +233,27 @@ fun AdicionarLivroScreen(
                         style = TextStyle(color = Color(0xFF0F2C3D), fontSize = 15.sp, fontWeight = FontWeight.Bold)
                     )
                     BasicText(
-                        text = "${livrosAtuais.size} itens",
+                        // ALTERADO: Agora conta apenas a quantidade filtrada da própria conta
+                        text = "${meusLivrosFiltrados.size} itens",
                         style = TextStyle(color = Color.Gray, fontSize = 13.sp)
                     )
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Renderização reativa dos livros vindo do DataStore
+                // Renderização reativa dos livros do usuário filtrados do DataStore
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.padding(bottom = 24.dp)
                 ) {
-                    if (livrosAtuais.isEmpty()) {
+                    if (meusLivrosFiltrados.isEmpty()) {
                         BasicText(
-                            text = "Nenhum livro cadastrado ainda.",
+                            text = "Você ainda não anunciou nenhum livro.",
                             style = TextStyle(color = Color.Gray, fontSize = 13.sp)
                         )
                     } else {
-                        livrosAtuais.forEach { livro ->
+                        // ALTERADO: Itera sobre a lista filtrada (meusLivrosFiltrados)
+                        meusLivrosFiltrados.forEach { livro ->
                             LinhaLivroAnunciado(
                                 livro = LivroAnunciadoVisual(
                                     titulo = livro.titulo,

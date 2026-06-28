@@ -62,8 +62,18 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
         }
     }
 
-    fun adicionarNovoAnuncio(titulo: String, autor: String, preco: String, tipo: String, condicao: String, descricao: String) {
+    fun adicionarNovoAnuncio(
+        titulo: String,
+        autor: String,
+        preco: String,
+        tipo: String,
+        condicao: String,
+        descricao: String
+    ) {
         viewModelScope.launch {
+            // Captura o whatsapp ou nome do usuário que está logado atualmente na sessão
+            val usuarioAtual = sessaoUsuario.value.whatsapp
+
             val novo = LivroPersistido(
                 id = UUID.randomUUID().toString(),
                 titulo = titulo,
@@ -71,7 +81,8 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
                 preco = preco,
                 tipoAnuncio = tipo,
                 condicao = condicao,
-                descricao = descricao
+                descricao = descricao,
+                donoAnuncio = usuarioAtual // ADICIONADO: Vincula o livro ao usuário logado
             )
             repository.salvarLivro(novo)
         }

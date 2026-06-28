@@ -61,6 +61,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                // CORRIGIDO: Agora renderiza a árvore de navegação principal diretamente
                 Greeting(
                     modifier = Modifier.padding(innerPadding)
                 )
@@ -110,7 +111,7 @@ fun Greeting(
                 )
             }
 
-// 2. Rota de Registro
+            // 2. Rota de Registro
             entry<RegistroKey>(metadata = ListDetailSceneStrategy.detailPane()) {
                 RegistroScreen(
                     onRegistroSucesso = { nome, email, whatsapp, senha ->
@@ -135,7 +136,7 @@ fun Greeting(
                 )
             ) {
                 HomeScreen(
-                    livros = livrosCadastrados, // Repassa a lista dinâmica do DataStore
+                    livros = livrosCadastrados, // Repassa a lista dinâmica sem filtros (vê tudo de todos)
                     onNavegarParaAdicionar = { backStack.add(AdicionarLivroKey) },
                     onNavegarParaPerfil = { backStack.add(PerfilKey) },
                     onLivroClicado = { chaveLivro -> backStack.add(chaveLivro) }
@@ -155,7 +156,6 @@ fun Greeting(
                         }
                     },
                     onExcluirAnuncio = {
-                        // Opcional: implementar viewModel.deletarAnuncio(key.id) caso decida adicionar essa função
                         if (backStack.size > 1) {
                             backStack.removeAt(backStack.lastIndex)
                         }
@@ -167,6 +167,7 @@ fun Greeting(
             entry<AdicionarLivroKey>(metadata = ListDetailSceneStrategy.listPane()) {
                 AdicionarLivroScreen(
                     livrosAtuais = livrosCadastrados, // Alimenta a listagem inferior com dados reativos
+                    usuarioWhatsapp = sessao.whatsapp, // MODIFICADO: Injeta o WhatsApp da sessão ativa para realizar o filtro interno
                     onSalvarAnuncio = { t, a, p, tipo, cond, desc ->
                         viewModel.adicionarNovoAnuncio(t, a, p, tipo, cond, desc)
                     },
@@ -178,8 +179,8 @@ fun Greeting(
             // 6. Tela Perfil
             entry<PerfilKey>(metadata = ListDetailSceneStrategy.listPane()) {
                 PerfilScreen(
-                    nomeUsuario = sessao.nome, // injeta nome salvo de forma dinâmica
-                    whatsappUsuario = sessao.whatsapp, // injeta número salvo de forma dinâmica
+                    nomeUsuario = sessao.nome, // Injeta nome salvo de forma dinâmica
+                    whatsappUsuario = sessao.whatsapp, // Injeta número salvo de forma dinâmica
                     onNavegarParaHome = { backStack.add(HomeKey) },
                     onNavegarParaAdicionar = { backStack.add(AdicionarLivroKey) },
                     onLogout = {

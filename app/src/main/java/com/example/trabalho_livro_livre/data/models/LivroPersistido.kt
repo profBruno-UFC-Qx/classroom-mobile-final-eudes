@@ -9,5 +9,6 @@ data class LivroPersistido(
     val preco: String,
     val tipoAnuncio: String,
     val condicao: String,
-    val descricao: String
+    val descricao: String,
+    val donoAnuncio: String
 )
