@@ -36,6 +36,7 @@ fun AdicionarLivroScreen(
     livrosAtuais: List<LivroPersistido> = emptyList(), // Conectado à lista reativa do DataStore
     usuarioWhatsapp: String = "", // ADICIONADO: Necessário para sabermos quem está logado e filtrar
     onSalvarAnuncio: (String, String, String, String, String, String) -> Unit = { _, _, _, _, _, _ -> }, // Callback da ViewModel
+    onLivroClicado: (LivroPersistido) -> Unit = {},
     onNavegarParaHome: () -> Unit = {},
     onNavegarParaPerfil: () -> Unit = {}
 ) {
@@ -262,7 +263,8 @@ fun AdicionarLivroScreen(
                                     corTagBg = if (livro.preco == "0.00" || livro.preco.isEmpty()) Color(0xFFE2F5EC) else Color(0xFFE3F2FD),
                                     corTagTexto = if (livro.preco == "0.00" || livro.preco.isEmpty()) Color(0xFF2E7D32) else Color(0xFF1565C0),
                                     corCapaSimulada = Color(0xFF2C435A)
-                                )
+                                ),
+                                onClick = { onLivroClicado(livro) } // Dispara o clique
                             )
                         }
                     }
@@ -379,15 +381,17 @@ fun CustomSeletorNativo(textoOpcao: String) {
 }
 
 @Composable
-fun LinhaLivroAnunciado(livro: LivroAnunciadoVisual) {
+fun LinhaLivroAnunciado(livro: LivroAnunciadoVisual,onClick: () -> Unit ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White, RoundedCornerShape(12.dp))
             .border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(12.dp))
+            .clickable { onClick() } // Tornando a linha inteira clicável
             .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Imagem da Capa
         Box(
             modifier = Modifier
                 .size(width = 46.dp, height = 64.dp)
@@ -396,6 +400,7 @@ fun LinhaLivroAnunciado(livro: LivroAnunciadoVisual) {
 
         Spacer(modifier = Modifier.width(12.dp))
 
+        // Informações do Livro
         Column(modifier = Modifier.weight(1f)) {
             BasicText(
                 text = livro.titulo,
@@ -416,14 +421,6 @@ fun LinhaLivroAnunciado(livro: LivroAnunciadoVisual) {
                     style = TextStyle(color = livro.corTagTexto, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 )
             }
-        }
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            BasicText(text = "✏️", modifier = Modifier.clickable { }, style = TextStyle(fontSize = 14.sp))
-            BasicText(text = "🗑️", modifier = Modifier.clickable { }, style = TextStyle(fontSize = 14.sp))
         }
     }
 }

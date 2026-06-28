@@ -52,6 +52,8 @@ data class DetalhesLivroKey(
     val titulo: String,
     val autor: String,
     val tipoAnuncio: String,
+    val condicao: String,       // Adicionado
+    val descricao: String,
     val isDono: Boolean
 ) : NavKey
 
@@ -151,6 +153,8 @@ fun Greeting(
                     tituloLivro = key.titulo,
                     autorLivro = key.autor,
                     tipoAnuncio = key.tipoAnuncio,
+                    condicaoLivro = key.condicao,   // Passando a condição
+                    descricaoLivro = key.descricao,
                     onVoltar = {
                         if (backStack.size > 1) {
                             backStack.removeAt(backStack.lastIndex)
@@ -170,10 +174,23 @@ fun Greeting(
             // 5. Tela Adicionar Livro (Library)
             entry<AdicionarLivroKey>(metadata = ListDetailSceneStrategy.listPane()) {
                 AdicionarLivroScreen(
-                    livrosAtuais = livrosCadastrados, // Alimenta a listagem inferior com dados reativos
-                    usuarioWhatsapp = sessao.whatsapp, // MODIFICADO: Injeta o WhatsApp da sessão ativa para realizar o filtro interno
+                    livrosAtuais = livrosCadastrados,
+                    usuarioWhatsapp = sessao.whatsapp,
                     onSalvarAnuncio = { t, a, p, tipo, cond, desc ->
                         viewModel.adicionarNovoAnuncio(t, a, p, tipo, cond, desc)
+                    },
+                    onLivroClicado = { livro ->
+                        backStack.add(
+                            DetalhesLivroKey(
+                                id = livro.id,
+                                titulo = livro.titulo,
+                                autor = livro.autor,
+                                tipoAnuncio = livro.tipoAnuncio,
+                                condicao = livro.condicao, // Agora existe na Key
+                                descricao = livro.descricao, // Agora existe na Key
+                                isDono = true
+                            )
+                        )
                     },
                     onNavegarParaHome = { backStack.add(HomeKey) },
                     onNavegarParaPerfil = { backStack.add(PerfilKey) }

@@ -33,6 +33,8 @@ data class LivroHome(
     val titulo: String,
     val autor: String,
     val tipo: String,
+    val condicao: String = "",    // Adicionado para suportar a Key
+    val descricao: String = "",
     val corTagBg: Color,
     val corTagTexto: Color,
     val corCapaSimulada: Color,
@@ -53,10 +55,10 @@ fun HomeScreen(
 
     // Livros mockados/padrão que já iniciam no aplicativo
     val livrosPadrao = listOf(
-        LivroHome("1", "A Metamorfose", "Franz Kafka", "DOAÇÃO", Color(0xFFE2F5EC), Color(0xFF2E7D32), Color(0xFF2C435A), false),
-        LivroHome("2", "1984", "George Orwell", "TROCA", Color(0xFFE3F2FD), Color(0xFF1565C0), Color(0xFF3B5249), false),
-        LivroHome("3", "O Pequeno Príncipe", "Saint-Exupéry", "VENDA", Color(0xFFFFF9C4), Color(0xFFF57F17), Color(0xFF5E4B3C), false),
-        LivroHome("4", "Dom Casmurro", "Machado de Assis", "DOAÇÃO", Color(0xFFE2F5EC), Color(0xFF2E7D32), Color(0xFFD9D9D9), false)
+        LivroHome("1", "A Metamorfose", "Franz Kafka", "DOAÇÃO", "Usado", "Livro clássico", Color(0xFFE2F5EC), Color(0xFF2E7D32), Color(0xFF2C435A), false),
+        LivroHome("2", "1984", "George Orwell", "TROCA", "Bom", "Distopia", Color(0xFFE3F2FD), Color(0xFF1565C0), Color(0xFF3B5249), false),
+        LivroHome("3", "O Pequeno Príncipe", "Saint-Exupéry", "VENDA", "Novo", "Infantil", Color(0xFFFFF9C4), Color(0xFFF57F17), Color(0xFF5E4B3C), false),
+        LivroHome("4", "Dom Casmurro", "Machado de Assis", "DOAÇÃO", "Usado", "Clássico brasileiro", Color(0xFFE2F5EC), Color(0xFF2E7D32), Color(0xFFD9D9D9), false)
     )
 
     // Mapeia os livros cadastrados dinamicamente no DataStore para o padrão visual da Home
@@ -218,6 +220,8 @@ fun HomeScreen(
                                                 titulo = livro.titulo,
                                                 autor = livro.autor,
                                                 tipoAnuncio = livro.tipo,
+                                                condicao = livro.condicao,
+                                                descricao = livro.descricao,
                                                 isDono = livro.isDono
                                             )
                                         )
