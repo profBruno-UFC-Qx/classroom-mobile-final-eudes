@@ -26,13 +26,13 @@ A proposta reduz o desperdício, ao dar um novo destino a livros que ficariam pa
 ## :triangular_flag_on_post:	 Principais funcionalidades da aplicação
 
 - Tela inicial com destaque de livros:
- Exibição de livros disponíveis, categorias e sugestões.
+ Exibição de livros disponíveis e categorias.
 - Busca de livros:
  Pesquisa por título, autor ou categoria.
 - Cadastro de livros (CRUD):
  Usuários podem adicionar, editar e remover livros disponíveis.
 - Detalhes do livro:
- Tela com informações completas, incluindo capa, descrição, autor e tipo de negociação.
+ Tela com informações completas descrição, autor e tipo de negociação.
 - Gerenciamento de anúncios:
  Usuário pode visualizar e editar seus próprios livros cadastrados.
 - Contato entre usuários:
