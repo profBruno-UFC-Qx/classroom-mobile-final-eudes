@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.trabalho_livro_livre.DetalhesLivroKey
 import com.example.trabalho_livro_livre.data.models.LivroPersistido
+import androidx.compose.ui.draw.clip
 
 // Modelo de dados unificado para exibição visual na Home
 data class LivroHome(
@@ -76,6 +77,19 @@ fun HomeScreen(
             // ALTERADO: Agora valida dinamicamente se o WhatsApp de quem criou bate com o logado
             isDono = livro.donoAnuncio == usuarioWhatsapp
         )
+    }
+
+    var textoPesquisa by remember { mutableStateOf("") }
+
+    val livrosFiltrados = remember(textoPesquisa, livros) {
+        if (textoPesquisa.isBlank()) {
+            livros
+        } else {
+            livros.filter {
+                it.titulo.contains(textoPesquisa, ignoreCase = true) ||
+                        it.autor.contains(textoPesquisa, ignoreCase = true)
+            }
+        }
     }
 
     // Une as duas listas para renderização (Os criados recentemente aparecem primeiro)
@@ -136,57 +150,29 @@ fun HomeScreen(
                     textStyle = TextStyle(color = Color.Black, fontSize = 14.sp),
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(horizontal = 16.dp) // Espaçamento externo
                         .height(46.dp)
                         .background(Color(0xFFF3F4F6), RoundedCornerShape(10.dp))
-                        .border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(10.dp))
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                        .border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(10.dp)),
+                    singleLine = true,
                     decorationBox = { innerTextField ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 12.dp)
+                        ) {
                             BasicText(text = "🔍  ", style = TextStyle(fontSize = 14.sp))
-                            if (busca.isEmpty()) {
-                                BasicText(
-                                    text = "Buscar por título, autor...",
-                                    style = TextStyle(color = Color.Gray, fontSize = 14.sp)
-                                )
+                            Box(modifier = Modifier.weight(1F)) {
+                                if (busca.isEmpty()) {
+                                    BasicText(
+                                        text = "Buscar por título, autor...",
+                                        style = TextStyle(color = Color.Gray, fontSize = 14.sp)
+                                    )
+                                }
+                                innerTextField()
                             }
-                            innerTextField()
                         }
                     }
                 )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 3. Categorias
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    items(categorias) { cat ->
-                        val isSelecionado = cat == "Tudo"
-                        Box(
-                            modifier = Modifier
-                                .background(
-                                    color = if (isSelecionado) Color(0xFFE2F5EC) else Color.White,
-                                    shape = RoundedCornerShape(20.dp)
-                                )
-                                .border(
-                                    width = 1.dp,
-                                    color = if (isSelecionado) Color(0xFFE2F5EC) else Color(0xFFE5E7EB),
-                                    shape = RoundedCornerShape(20.dp)
-                                )
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                        ) {
-                            BasicText(
-                                text = cat,
-                                style = TextStyle(
-                                    color = if (isSelecionado) Color(0xFF2E7D32) else Color(0xFF4B5563),
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            )
-                        }
-                    }
-                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -206,16 +192,18 @@ fun HomeScreen(
                         columns = GridCells.Fixed(2),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalArrangement = Arrangement.spacedBy(14.dp),
+                        contentPadding = PaddingValues(16.dp), // Espaçamento das bordas da tela
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(listaFiltrada) { livro ->
+                            // Card Principal
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(Color.White, RoundedCornerShape(8.dp))
-                                    .border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(8.dp))
+                                    .border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(12.dp))
+                                    .clip(RoundedCornerShape(12.dp)) // Necessário para o efeito de clique respeitar a borda
+                                    .background(Color.White, RoundedCornerShape(12.dp)) // Borda um pouco mais suave
                                     .clickable {
-                                        // Aciona a rota repassando se REALMENTE é o dono comparado na linha 53
                                         onLivroClicado(
                                             DetalhesLivroKey(
                                                 id = livro.id,
@@ -230,20 +218,21 @@ fun HomeScreen(
                                     }
                             ) {
                                 Column {
+                                    // Área da Imagem/Capa
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .height(150.dp)
+                                            .height(130.dp) // Altura um pouco menor para cards mais equilibrados
                                             .background(livro.corCapaSimulada)
                                     ) {
                                         Box(
                                             modifier = Modifier
                                                 .padding(8.dp)
                                                 .background(livro.corTagBg, RoundedCornerShape(4.dp))
-                                                .padding(horizontal = 6.dp, vertical = 3.dp)
+                                                .padding(horizontal = 6.dp, vertical = 2.dp)
                                         ) {
                                             BasicText(
-                                                text = livro.tipo,
+                                                text = livro.tipo.uppercase(), // Texto em maiúsculo para tag
                                                 style = TextStyle(
                                                     color = livro.corTagTexto,
                                                     fontSize = 9.sp,
@@ -253,14 +242,15 @@ fun HomeScreen(
                                         }
                                     }
 
-                                    Column(modifier = Modifier.padding(8.dp)) {
+                                    // Área de Texto
+                                    Column(modifier = Modifier.padding(10.dp)) {
                                         BasicText(
                                             text = livro.titulo,
                                             style = TextStyle(color = Color(0xFF1F2937), fontSize = 14.sp, fontWeight = FontWeight.Bold),
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis
                                         )
-                                        Spacer(modifier = Modifier.height(2.dp))
+                                        Spacer(modifier = Modifier.height(4.dp))
                                         BasicText(
                                             text = livro.autor,
                                             style = TextStyle(color = Color(0xFF6B7280), fontSize = 12.sp),
