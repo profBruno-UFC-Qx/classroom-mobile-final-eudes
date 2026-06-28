@@ -153,7 +153,7 @@ fun Greeting(
                     tituloLivro = key.titulo,
                     autorLivro = key.autor,
                     tipoAnuncio = key.tipoAnuncio,
-                    condicaoLivro = key.condicao,   // Passando a condição
+                    condicaoLivro = key.condicao,
                     descricaoLivro = key.descricao,
                     onVoltar = {
                         if (backStack.size > 1) {
@@ -161,13 +161,23 @@ fun Greeting(
                         }
                     },
                     onExcluirAnuncio = {
-                        // CHAMADA REAL: Remove do DataStore e volta para a tela anterior
                         viewModel.deletarAnuncio(idLivro = key.id) {
                             if (backStack.size > 1) {
                                 backStack.removeAt(backStack.lastIndex)
                             }
                         }
+                    },
+                    // --- ADICIONE ESTA PARTE ---
+                    onEditarAnuncio = { novoTitulo, novoAutor, novoPreco, novaDescricao ->
+                        viewModel.atualizarAnuncio(
+                            idLivro = key.id,
+                            novoTitulo = novoTitulo,
+                            novoAutor = novoAutor,
+                            novoPreco = novoPreco,
+                            novaDescricao = novaDescricao
+                        )
                     }
+                    // ---------------------------
                 )
             }
 

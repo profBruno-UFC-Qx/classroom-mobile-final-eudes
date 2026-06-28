@@ -68,6 +68,13 @@ class AppRepository(private val context: Context) {
         }
     }
 
+    suspend fun salvarListaCompleta(lista: List<LivroPersistido>) {
+        context.dataStore.edit { prefs ->
+            // Serializa a lista completa e salva no DataStore
+            prefs[DataStoreKeys.LISTA_LIVROS] = Json.encodeToString(lista)
+        }
+    }
+
     suspend fun salvarSessao(nome: String, whatsapp: String) {
         context.dataStore.edit { prefs ->
             prefs[DataStoreKeys.USER_NOME] = nome

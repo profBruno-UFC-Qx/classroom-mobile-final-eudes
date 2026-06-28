@@ -8,6 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,7 +32,7 @@ fun DetalhesLivroScreen(
     descricaoLivro: String = "A Metamorfose é a mais célebre novela de Franz Kafka e uma das mais importantes da história da literatura. O texto narra a história de Gregor Samsa, um caixeiro-viajante que abandona as suas próprias vontades para sustentar a família.",
     corCapaSimulada: Color = Color(0xFF2C435A),
     onVoltar: () -> Unit = {},
-    onEditarAnuncio: () -> Unit = {},
+    onEditarAnuncio: (String, String, String, String) -> Unit,
     onExcluirAnuncio: () -> Unit = {},
     onChamarNoWhatsapp: () -> Unit = {}
 ) {
@@ -39,6 +40,15 @@ fun DetalhesLivroScreen(
     val isDoacaoOuTroca = tipoAnuncio.contains("DOAÇÃO") || tipoAnuncio.contains("TROCA")
     val corTagBg = if (isDoacaoOuTroca) Color(0xFFE2F5EC) else Color(0xFFFFF9C4)
     val corTagTexto = if (isDoacaoOuTroca) Color(0xFF2E7D32) else Color(0xFFF57F17)
+
+    // --- ESTADOS PARA EDIÇÃO ---
+    var editando by remember { mutableStateOf(false) }
+    var tituloEdit by remember { mutableStateOf(tituloLivro) }
+    var autorEdit by remember { mutableStateOf(autorLivro) }
+    var precoEdit by remember { mutableStateOf("") } // Se tiver o preço
+    var descricaoEdit by remember { mutableStateOf(descricaoLivro) }
+    var tipoAnuncioEdit by remember { mutableStateOf(tipoAnuncio) }
+    var condicaoEdit by remember { mutableStateOf(condicaoLivro) }
 
     Column(
         modifier = modifier
@@ -108,17 +118,33 @@ fun DetalhesLivroScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             // 3. Bloco de Informações Textuais (Modo Leitura)
-            BasicText(
-                text = tituloLivro,
-                style = TextStyle(color = Color(0xFF0F2C3D), fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            )
+            if (editando) {
+                BasicTextField(
+                    value = tituloEdit,
+                    onValueChange = { tituloEdit = it },
+                    modifier = Modifier.fillMaxWidth().background(Color(0xFFF9FAFB)).padding(8.dp)
+                )
+            } else {
+                BasicText(
+                    text = tituloLivro,
+                    style = TextStyle(color = Color(0xFF0F2C3D), fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                )
+            }
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            BasicText(
-                text = "por $autorLivro",
-                style = TextStyle(color = Color(0xFF6B7280), fontSize = 16.sp)
-            )
+            if (editando) {
+                BasicTextField(
+                    value = autorEdit,
+                    onValueChange = { autorEdit = it },
+                    modifier = Modifier.fillMaxWidth().background(Color(0xFFF9FAFB)).padding(8.dp)
+                )
+            } else {
+                BasicText(
+                    text = "por $autorLivro",
+                    style = TextStyle(color = Color(0xFF6B7280), fontSize = 16.sp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -142,10 +168,22 @@ fun DetalhesLivroScreen(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            BasicText(
-                text = descricaoLivro.ifBlank { "Nenhuma descrição fornecida para este livro." },
-                style = TextStyle(color = Color(0xFF4B5563), fontSize = 14.sp, lineHeight = 20.sp)
-            )
+            if (editando) {
+                BasicTextField(
+                    value = descricaoEdit,
+                    onValueChange = { descricaoEdit = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp) // Altura maior para descrição
+                        .background(Color(0xFFF9FAFB), RoundedCornerShape(4.dp))
+                        .padding(8.dp)
+                )
+            } else {
+                BasicText(
+                    text = descricaoLivro.ifBlank { "Nenhuma descrição fornecida." },
+                    style = TextStyle(color = Color(0xFF4B5563), fontSize = 14.sp, lineHeight = 20.sp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(30.dp))
 
@@ -157,19 +195,35 @@ fun DetalhesLivroScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     // Botão Editar
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(46.dp)
-                            .background(Color.White, RoundedCornerShape(8.dp))
-                            .border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(8.dp))
-                            .clickable { onEditarAnuncio() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        BasicText(
-                            text = "✏️  Editar",
-                            style = TextStyle(color = Color(0xFF1F2937), fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                        )
+                    if (editando) {
+                        // Botão Salvar
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(46.dp)
+                                .background(Color(0xFF2E7D32), RoundedCornerShape(8.dp)) // Cor de sucesso
+                                .clickable {
+                                    // CHAMA A FUNÇÃO DA VIEWMODEL AQUI
+                                    onEditarAnuncio(tituloEdit, autorEdit, precoEdit, descricaoEdit)
+                                    editando = false
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            BasicText(text = "💾 Salvar", style = TextStyle(color = Color.White))
+                        }
+                    } else {
+                        // Botão Editar original
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(46.dp)
+                                .background(Color.White, RoundedCornerShape(8.dp))
+                                .border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(8.dp))
+                                .clickable { editando = true },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            BasicText(text = "✏️ Editar", style = TextStyle(color = Color(0xFF1F2937)))
+                        }
                     }
 
                     // Botão Excluir
@@ -230,16 +284,16 @@ fun FichaInformativaItem(label: String, valor: String, modifier: Modifier = Modi
     }
 }
 
-// --- PREVIEWS CONFIGURADOS PARA TESTAR AS DUAS VERSÕES NA IDE ---
+// --- PREVIEWS CONFIGURADOS PARA TESTAR AS DUAS VERSÕES NA IDE ---F
 
 @Preview(showBackground = true, name = "Visão do Comprador (Consumidor)")
 @Composable
 fun DetalhesConsumidorPreview() {
-    DetalhesLivroScreen(isDonoDoAnuncio = false, tipoAnuncio = "R$ 45,00")
+    DetalhesLivroScreen(isDonoDoAnuncio = false, tipoAnuncio = "R$ 45,00",onEditarAnuncio = { _, _, _, _ -> })
 }
 
 @Preview(showBackground = true, name = "Visão do Dono do Anúncio")
 @Composable
 fun DetalhesDonoPreview() {
-    DetalhesLivroScreen(isDonoDoAnuncio = true, tipoAnuncio = "TROCA")
+    DetalhesLivroScreen(isDonoDoAnuncio = true, tipoAnuncio = "TROCA",onEditarAnuncio = { _, _, _, _ -> })
 }

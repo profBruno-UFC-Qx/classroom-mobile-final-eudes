@@ -37,6 +37,36 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
         }
     }
 
+    fun atualizarAnuncio(
+        idLivro: String,
+        novoTitulo: String,
+        novoAutor: String,
+        novoPreco: String,
+        novaDescricao: String
+    ) {
+        viewModelScope.launch {
+            // Pega a lista atual do fluxo
+            val listaAtual = repository.livrosFlow.first() // Use .first() para pegar o valor atual uma única vez
+
+            // Cria uma nova lista com o item modificado
+            val listaModificada = listaAtual.map { livro ->
+                if (livro.id == idLivro) {
+                    livro.copy(
+                        titulo = novoTitulo,
+                        autor = novoAutor,
+                        preco = novoPreco,
+                        descricao = novaDescricao
+                    )
+                } else {
+                    livro
+                }
+            }
+
+            // Chama a nova função que acabamos de criar no Repository
+            repository.salvarListaCompleta(listaModificada)
+        }
+    }
+
     // ADICIONADO: Lógica real que valida se os dados digitados coincidem com o cadastro do dispositivo
     fun tentarLogin(emailDigitado: String, senhaDigitada: String, onSucesso: () -> Unit, onErro: (String) -> Unit) {
         viewModelScope.launch {
