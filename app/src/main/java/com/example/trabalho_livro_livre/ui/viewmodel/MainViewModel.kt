@@ -12,6 +12,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.UUID
 
+import android.content.Context
+import com.example.trabalho_livro_livre.exibirNotificacaoLivro
+import kotlinx.coroutines.launch
+
 class MainViewModel(private val repository: AppRepository) : ViewModel() {
 
     val sessaoUsuario: StateFlow<UsuarioSessao> = repository.sessaoUsuarioFlow
@@ -98,7 +102,8 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
         preco: String,
         tipo: String,
         condicao: String,
-        descricao: String
+        descricao: String,
+        context: Context // Adicionado para disparar a notificação
     ) {
         viewModelScope.launch {
             // Captura o whatsapp ou nome do usuário que está logado atualmente na sessão
@@ -112,9 +117,14 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
                 tipoAnuncio = tipo,
                 condicao = condicao,
                 descricao = descricao,
-                donoAnuncio = usuarioAtual // ADICIONADO: Vincula o livro ao usuário logado
+                donoAnuncio = usuarioAtual
             )
+
+            // 1. Salva no Repository
             repository.salvarLivro(novo)
+
+            // 2. Dispara a notificação após o salvamento
+            exibirNotificacaoLivro(context, titulo)
         }
     }
 

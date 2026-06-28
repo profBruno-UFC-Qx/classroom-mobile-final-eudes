@@ -31,6 +31,13 @@ import com.example.trabalho_livro_livre.ui.screens.*
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.os.Build
+import androidx.core.app.NotificationCompat
+import com.example.trabalho_livro_livre.R
+
 @Serializable
 data object LoginKey : NavKey
 
@@ -186,8 +193,8 @@ fun Greeting(
                 AdicionarLivroScreen(
                     livrosAtuais = livrosCadastrados,
                     usuarioWhatsapp = sessao.whatsapp,
-                    onSalvarAnuncio = { t, a, p, tipo, cond, desc ->
-                        viewModel.adicionarNovoAnuncio(t, a, p, tipo, cond, desc)
+                    onSalvarAnuncio = { t, a, p, tipo, cond, desc, ctx ->
+                        viewModel.adicionarNovoAnuncio(t, a, p, tipo, cond, desc, ctx)
                     },
                     onLivroClicado = { livro ->
                         backStack.add(
@@ -228,4 +235,30 @@ fun Greeting(
         },
         modifier = modifier
     )
+}
+
+fun exibirNotificacaoLivro(context: Context, tituloLivro: String) {
+    val canalId = "canal_livros"
+    val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+    // 1. Criar canal (Necessário apenas uma vez, mas seguro rodar sempre)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val channel = NotificationChannel(
+            canalId, "Notificações de Livros",
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        manager.createNotificationChannel(channel)
+    }
+
+    // 2. Construir a notificação
+    val notificacao = NotificationCompat.Builder(context, canalId)
+        .setSmallIcon(android.R.drawable.ic_dialog_info) // Ícone padrão
+        .setContentTitle("Livro Adicionado!")
+        .setContentText("O livro '$tituloLivro' foi adicionado com sucesso.")
+        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        .setAutoCancel(true)
+        .build()
+
+    // 3. Exibir
+    manager.notify(1, notificacao)
 }

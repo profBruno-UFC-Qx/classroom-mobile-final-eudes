@@ -1,5 +1,6 @@
 package com.example.trabalho_livro_livre.ui.screens
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -35,7 +37,7 @@ fun AdicionarLivroScreen(
     modifier: Modifier = Modifier,
     livrosAtuais: List<LivroPersistido> = emptyList(), // Conectado à lista reativa do DataStore
     usuarioWhatsapp: String = "", // ADICIONADO: Necessário para sabermos quem está logado e filtrar
-    onSalvarAnuncio: (String, String, String, String, String, String) -> Unit = { _, _, _, _, _, _ -> }, // Callback da ViewModel
+    onSalvarAnuncio: (String, String, String, String, String, String, Context) -> Unit = { _, _, _, _, _, _, _ -> }, // Callback da ViewModel
     onLivroClicado: (LivroPersistido) -> Unit = {},
     onNavegarParaHome: () -> Unit = {},
     onNavegarParaPerfil: () -> Unit = {}
@@ -54,6 +56,8 @@ fun AdicionarLivroScreen(
     val meusLivrosFiltrados = remember(livrosAtuais, usuarioWhatsapp) {
         livrosAtuais.filter { it.donoAnuncio == usuarioWhatsapp }
     }
+
+    val context = LocalContext.current
 
     Column(
         modifier = modifier
@@ -207,7 +211,8 @@ fun AdicionarLivroScreen(
                                         preco.ifEmpty { "0.00" },
                                         tipoAnuncioSelecionado, // Agora variável
                                         condicaoSelecionada,
-                                        descricao
+                                        descricao,
+                                        context
                                     )
                                     // Limpa os campos do formulário para o próximo input
                                     titulo = ""

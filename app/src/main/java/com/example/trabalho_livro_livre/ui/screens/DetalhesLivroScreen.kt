@@ -47,8 +47,6 @@ fun DetalhesLivroScreen(
     var autorEdit by remember { mutableStateOf(autorLivro) }
     var precoEdit by remember { mutableStateOf("") } // Se tiver o preço
     var descricaoEdit by remember { mutableStateOf(descricaoLivro) }
-    var tipoAnuncioEdit by remember { mutableStateOf(tipoAnuncio) }
-    var condicaoEdit by remember { mutableStateOf(condicaoLivro) }
 
     Column(
         modifier = modifier
