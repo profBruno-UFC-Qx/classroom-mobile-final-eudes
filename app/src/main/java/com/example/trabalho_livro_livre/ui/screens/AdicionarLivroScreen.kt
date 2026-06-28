@@ -47,8 +47,8 @@ fun AdicionarLivroScreen(
     var descricao by remember { mutableStateOf("") }
 
     // Estados fixos simulados para os seletores (podem ser expandidos no futuro)
-    val tipoAnuncioSelecionado = "VENDA"
-    val condicaoSelecionada = "Novo"
+    var tipoAnuncioSelecionado by remember { mutableStateOf("VENDA") }
+    var condicaoSelecionada by remember { mutableStateOf("Novo") }
 
     // FILTRO REAL: Filtra dinamicamente para mostrar apenas os livros criados por esta conta
     val meusLivrosFiltrados = remember(livrosAtuais, usuarioWhatsapp) {
@@ -161,18 +161,22 @@ fun AdicionarLivroScreen(
                             CustomInputNativo(valor = preco, onValorAlterado = { preco = it }, dica = "0,00")
                         }
                         Column(modifier = Modifier.weight(1f)) {
-                            BasicText("Negociação", style = TextStyle(fontSize = 13.sp, color = Color(0xFF4B5563), fontWeight = FontWeight.Medium))
-                            Spacer(modifier = Modifier.height(4.dp))
-                            CustomSeletorNativo(textoOpcao = tipoAnuncioSelecionado)
+                            CustomSeletorInterativo(
+                                label = "Negociação",
+                                opcoes = listOf("VENDA", "TROCA", "DOAÇÃO"),
+                                selecionado = tipoAnuncioSelecionado,
+                                onSelecao = { tipoAnuncioSelecionado = it }
+                            )
                         }
                     }
 
                     // Campo: Estado de Conservação
-                    Column {
-                        BasicText("Estado de Conservação", style = TextStyle(fontSize = 13.sp, color = Color(0xFF4B5563), fontWeight = FontWeight.Medium))
-                        Spacer(modifier = Modifier.height(4.dp))
-                        CustomSeletorNativo(textoOpcao = condicaoSelecionada)
-                    }
+                    CustomSeletorInterativo(
+                        label = "Estado de Conservação",
+                        opcoes = listOf("Novo", "Excelente", "Bom", "Usado"),
+                        selecionado = condicaoSelecionada,
+                        onSelecao = { condicaoSelecionada = it }
+                    )
 
                     // Campo: Descrição
                     Column {
@@ -201,7 +205,7 @@ fun AdicionarLivroScreen(
                                         titulo,
                                         autor,
                                         preco.ifEmpty { "0.00" },
-                                        tipoAnuncioSelecionado,
+                                        tipoAnuncioSelecionado, // Agora variável
                                         condicaoSelecionada,
                                         descricao
                                     )
@@ -377,6 +381,52 @@ fun CustomSeletorNativo(textoOpcao: String) {
     ) {
         BasicText(text = textoOpcao, style = TextStyle(color = Color.Black, fontSize = 14.sp))
         BasicText(text = "▼", style = TextStyle(color = Color.Gray, fontSize = 10.sp))
+    }
+}
+
+@Composable
+fun CustomSeletorInterativo(
+    label: String,
+    opcoes: List<String>,
+    selecionado: String,
+    onSelecao: (String) -> Unit
+) {
+    var expandido by remember { mutableStateOf(false) }
+
+    Column {
+        BasicText(label, style = TextStyle(fontSize = 13.sp, color = Color(0xFF4B5563), fontWeight = FontWeight.Medium))
+        Spacer(modifier = Modifier.height(4.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp)
+                .background(Color.White, RoundedCornerShape(6.dp))
+                .border(1.dp, Color(0xFFCCCCCC), RoundedCornerShape(6.dp))
+                .clickable { expandido = true }
+                .padding(horizontal = 10.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                BasicText(text = selecionado, style = TextStyle(color = Color.Black, fontSize = 14.sp))
+                BasicText(text = "▼", style = TextStyle(color = Color.Gray, fontSize = 10.sp))
+            }
+
+            // O DropdownMenu aparece aqui
+            androidx.compose.material3.DropdownMenu(
+                expanded = expandido,
+                onDismissRequest = { expandido = false }
+            ) {
+                opcoes.forEach { opcao ->
+                    androidx.compose.material3.DropdownMenuItem(
+                        text = { androidx.compose.material3.Text(opcao) },
+                        onClick = {
+                            onSelecao(opcao)
+                            expandido = false
+                        }
+                    )
+                }
+            }
+        }
     }
 }
 
