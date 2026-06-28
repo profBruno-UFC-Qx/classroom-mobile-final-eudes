@@ -87,4 +87,16 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
             repository.salvarLivro(novo)
         }
     }
+
+    // MODIFICADO: Função implementada para realizar a exclusão real do anúncio no repositório
+    fun deletarAnuncio(idLivro: String, onSucesso: () -> Unit) {
+        viewModelScope.launch {
+            // Busca o livro específico na lista atual emitida pelo StateFlow através do ID
+            val livroParaRemover = listaLivros.value.find { it.id == idLivro }
+            if (livroParaRemover != null) {
+                repository.deletarLivro(livroParaRemover)
+                onSucesso()
+            }
+        }
+    }
 }

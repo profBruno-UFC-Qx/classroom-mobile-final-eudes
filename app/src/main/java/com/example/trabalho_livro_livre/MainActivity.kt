@@ -144,7 +144,7 @@ fun Greeting(
                 )
             }
 
-            // 4. Tela Detalhes do Livro
+            // 4. Tela Detalhes do Livro (ATUALIZADO)
             entry<DetalhesLivroKey>(metadata = ListDetailSceneStrategy.detailPane()) { key ->
                 DetalhesLivroScreen(
                     isDonoDoAnuncio = key.isDono,
@@ -157,8 +157,11 @@ fun Greeting(
                         }
                     },
                     onExcluirAnuncio = {
-                        if (backStack.size > 1) {
-                            backStack.removeAt(backStack.lastIndex)
+                        // CHAMADA REAL: Remove do DataStore e volta para a tela anterior
+                        viewModel.deletarAnuncio(idLivro = key.id) {
+                            if (backStack.size > 1) {
+                                backStack.removeAt(backStack.lastIndex)
+                            }
                         }
                     }
                 )

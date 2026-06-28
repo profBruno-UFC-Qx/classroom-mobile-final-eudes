@@ -53,6 +53,21 @@ class AppRepository(private val context: Context) {
         }
     }
 
+    suspend fun deletarLivro(livro: LivroPersistido) {
+        context.dataStore.edit { prefs ->
+            // 1. Lê a lista atual do DataStore
+            val jsonAtual = prefs[DataStoreKeys.LISTA_LIVROS]
+            val listaAtual = if (jsonAtual.isNullOrEmpty()) emptyList()
+            else try { Json.decodeFromString<List<LivroPersistido>>(jsonAtual) } catch(e: Exception) { emptyList() }
+
+            // 2. Filtra a lista removendo o livro com o ID correspondente
+            val novaLista = listaAtual.filterNot { it.id == livro.id }
+
+            // 3. Salva a nova lista de volta no DataStore
+            prefs[DataStoreKeys.LISTA_LIVROS] = Json.encodeToString(novaLista)
+        }
+    }
+
     suspend fun salvarSessao(nome: String, whatsapp: String) {
         context.dataStore.edit { prefs ->
             prefs[DataStoreKeys.USER_NOME] = nome
